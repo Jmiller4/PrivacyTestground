@@ -1,0 +1,1 @@
+# holds description of a "consumer" class/object
