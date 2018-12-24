@@ -9,6 +9,7 @@ class consumer:
     def __init__(self):
         self.id = random.getrandbits(128)
         self.data = dict()
+        self.alpha = random.uniform(0, 1)
 
     def generateData(self):
         #Location is uniformly distributed over earth
