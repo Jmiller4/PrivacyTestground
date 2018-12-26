@@ -7,7 +7,7 @@ class federation:
     def __init__(self):
         self.consumerList = list()
         self.vendorList = list()
-        self.blockchain = list()
+        self.blockchain = dict()
 
 
     def distort(self, info, alpha):
@@ -60,3 +60,27 @@ class federation:
 
         for v in self.vendorList:
             v.updateBlockchain(self.blockchain)
+
+
+    def ContractExists(self, VendorID, ConsumerID):
+        if VendorID in self.blockchain:
+            if ConsumerID in self.blockchain[VendorID]:
+                return True
+        return False
+
+    def makeContract(self, vendor, consumer, alpha):
+        if self.ContractExists(vendor.getID(), consumer.getID()):
+            return False
+        if vendor.getID() not in self.blockchain:
+            self.blockchain[vendor.getID()] = dict()
+        self.blockchain[vendor.getID()][consumer.getID()] = consumer.getData(alpha)
+        return True
+
+    def getData(self, vendor, consumer):
+        VendorID = vendor.getID()
+        if VendorID in self.blockchain:
+            ConsumerID = consumer.getID()
+            if ConsumerID in self.blockchain[VendorID]:
+                return self.blockchain[VendorID][ConsumerID]
+        return False
+

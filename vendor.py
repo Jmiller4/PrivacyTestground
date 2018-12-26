@@ -6,6 +6,7 @@ import random
 class vendor:
     def __init__(self):
         self.id = random.getrandbits(128)
+        self.recommend = self.model
 
     def model(self, data):
         gender = data["isMale"] == 1
@@ -13,3 +14,9 @@ class vendor:
         popular = data["Friends"] > 300
         ans = gender + neutral + popular >= 2
         return ans
+
+    def getModel(self):
+        return self.recommend
+
+    def getID(self):
+        return self.id

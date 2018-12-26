@@ -34,6 +34,24 @@ class consumer:
     def updateData(self, key, value):
         self.data[key] = value
 
+    def Distort(self, alpha):
+        Distort = dict()
+        for key in self.data:
+            #Degree of variability should be based on underlying true distribution
+            #Limit to a minimum number of users to preserve identity and provide distribution
+            rndSeed = random.random()
+            neg = random.random() > .5
+            if neg :
+                rndSeed = -1 * rndSeed
+            Distort[key] = self.data[key] + alpha * rndSeed
+        return Distort
+
+    def getData(self, alpha):
+        return self.Distort(alpha)
+
+    def getID(self):
+        return self.id
+
     def toString(self):
         dictString = "User: " + str(self.id) + '\n'
         for x in self.data:
