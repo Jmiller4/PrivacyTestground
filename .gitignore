@@ -1,1 +1,4 @@
 *.idea
+venv/pyvenv.cfg
+venv/Scripts/activate
+venv/
