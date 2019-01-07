@@ -2,29 +2,53 @@
 
 import random
 
-class federation:
+
+class Federation:
 
     def __init__(self):
         self.consumerList = list()
         self.vendorList = list()
-        self.blockchain = dict()
+        self.blockchain_buffer = set()
+        self.blockchain = list()
+        self.entities = dict()
+        self.IDs = set()
 
+    def addMember(self, e, id):
+        self.entities[id] = e
+        self.IDs.add(id)
+        # may want to add exception-throwing when this is called with an id that's already in use
 
-    def distort(self, info, alpha):
+    def add_to_blockchain_buffer(self, data):
+        if str(data) in self.blockchain_buffer:
+            self.blockchain.append(data)
+            self.blockchain_buffer.remove(str(data))
+        else:
+            self.blockchain_buffer.add(str(data))
+
+    def add_to_blockchain(self, data):
+        self.blockchain.append(data)
+
+    def blockchain_to_string(self):
+        s = ""
+        for entry in self.blockchain:
+            s += str(entry) + "\n"
+        return s
+
+    @staticmethod
+    def distort(info, alpha, seed):
 
         # if info is a list of numbers and alpha is a number between 0 and 1,
         # then distort will sum each number of the list with a random number between -alpha and alpha,
         # and return the new list created by that process
 
+        random.seed(seed)
         d = list()
-
         for i in info:
-            d.append(i + random.uniform(-alpha, alpha))
-
+            d.append(i + random.randint(-alpha, alpha))
         return d
 
-
-    def reccomend(self, model, distortedInfo):
+    @staticmethod
+    def recommend(model, distortedInfo):
 
         # here's my first shot at a simple way to do models and recommendations:
         # model is a list of (number, string) tuples
@@ -37,50 +61,35 @@ class federation:
         # For now, let's also assume that the numbers in the model will be in increasing order
 
         s = sum(distortedInfo)
-
-        rec = "None"
-
+        rec = model[0][1]
         for x in model:
             if s > x[0]:
                 rec = x[1]
-
         return rec
 
+    @staticmethod
+    def alpha_bargain(c, v):
+        return (c.preferredAlpha + v.preferredAlpha) / 2
 
-
-    def addToBlockchain(self, data):
-
-        self.blockchain.append(data)
-        self.broadcastBlockchain()
-
-    def broadcastBlockchain(self):
-
-        for c in self.consumerList:
-            c.updateBlockchain(self.blockchain)
-
-        for v in self.vendorList:
-            v.updateBlockchain(self.blockchain)
-
-
-    def ContractExists(self, VendorID, ConsumerID):
-        if VendorID in self.blockchain:
-            if ConsumerID in self.blockchain[VendorID]:
-                return True
-        return False
-
-    def makeContract(self, vendor, consumer, alpha):
-        if self.ContractExists(vendor.getID(), consumer.getID()):
-            return False
-        if vendor.getID() not in self.blockchain:
-            self.blockchain[vendor.getID()] = dict()
-        self.blockchain[vendor.getID()][consumer.getID()] = consumer.getData(alpha)
-        return True
-
-    def getData(self, vendor, consumer):
-        VendorID = vendor.getID()
-        if VendorID in self.blockchain:
-            ConsumerID = consumer.getID()
-            if ConsumerID in self.blockchain[VendorID]:
-                return self.blockchain[VendorID][ConsumerID]
-        return False
-
+    # def ContractExists(self, VendorID, ConsumerID):
+    #     if VendorID in self.blockchain:
+    #         if ConsumerID in self.blockchain[VendorID]:
+    #             return True
+    #     return False
+    #
+    # def makeContract(self, vendor, consumer, alpha):
+    #     if self.ContractExists(vendor.getID(), consumer.getID()):
+    #         return False
+    #     if vendor.getID() not in self.blockchain:
+    #         self.blockchain[vendor.getID()] = dict()
+    #     self.blockchain[vendor.getID()][consumer.getID()] = consumer.getData(alpha)
+    #     return True
+    #
+    # def getData(self, vendor, consumer):
+    #     VendorID = vendor.getID()
+    #     if VendorID in self.blockchain:
+    #         ConsumerID = consumer.getID()
+    #         if ConsumerID in self.blockchain[VendorID]:
+    #             return self.blockchain[VendorID][ConsumerID]
+    #     return False
+    #
