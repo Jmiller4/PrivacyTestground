@@ -21,7 +21,7 @@ class Consumer(Entity):
         self.distortedDataOfAgreementInProgress = None
         self.vendorOfAgreementInProgress = None
 
-        self.recommendationsRecieved = list()
+        self.memory = list()
 
     # def generateData(self):
     #     #Location is uniformly distributed over earth
@@ -81,7 +81,9 @@ class Consumer(Entity):
         self.fed.add_to_blockchain_buffer(
             {"type": "transaction", "time": self.time, "consumer": self.id, "vendor": self.vendorOfAgreementInProgress.id, "alpha hash": hash(self.alphaOfAgreementInProgress),
              "distorted data hash": hash(str(self.distortedDataOfAgreementInProgress)), "recommendation hash": hash(rec)})
-        self.recommendationsRecieved.append((self.vendorOfAgreementInProgress.id, rec))
+
+        self.memory.append({"time": self.time, "vendor": self.vendorOfAgreementInProgress.id, "alpha": self.alphaOfAgreementInProgress,
+             "distorted data": self.distortedDataOfAgreementInProgress, "recommendation": rec})
         self.alphaOfAgreementInProgress = None
         self.distortedDataOfAgreementInProgress = None
         self.vendorOfAgreementInProgress = None

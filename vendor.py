@@ -15,7 +15,7 @@ class Vendor(Entity):
 
         self.consumerOfAgreementInProgress = None
 
-        self.dataRecieved = list()
+        self.memory = list()
 
     # def model_as_algorithm(self, data):
     #     gender = data["isMale"] == 1
@@ -51,7 +51,8 @@ class Vendor(Entity):
         self.fed.add_to_blockchain_buffer(
             {"type": "transaction", "time": self.time, "consumer": self.consumerOfAgreementInProgress.id, "vendor": self.id, "alpha hash": hash(alpha),
              "distorted data hash": hash(str(d)), "recommendation hash": hash(rec)})
-        self.dataRecieved.append((self.consumerOfAgreementInProgress, d))
+        self.memory.append({"time": self.time, "consumer": self.consumerOfAgreementInProgress.id, "alpha": alpha,
+             "distorted data": d, "recommendation": rec})
         self.consumerOfAgreementInProgress.recieve_rec(rec)
         self.consumerOfAgreementInProgress = None
 
