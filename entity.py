@@ -9,7 +9,7 @@ class Entity:
         self.fed = fed
         self.preferredAlpha = random.uniform(0, 5) * 2
         self.id = self.generate_id()
-        self.fed.addMember(self, self.id)
+        self.time = 0
 
     # "agreements" should be a record of all the info exchange agreements an entity has with others
     # indexed by id first, which goes to a second dictionary of info about the other party
@@ -25,3 +25,11 @@ class Entity:
 
     def get_id(self):
         return self.id
+
+    def get_parties(self):
+        self.consumers = self.fed.consumerList()
+        self.vendors = self.fed.getVendorList()
+
+    def incrementTime(self):
+        self.time += 1
+

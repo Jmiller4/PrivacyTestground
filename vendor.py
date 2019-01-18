@@ -8,9 +8,14 @@ from globaldata import *
 class Vendor(Entity):
     def __init__(self, fed):
         Entity.__init__(self, fed)
+        self.consumersIKnowAbout = list()
         self.model = self.generate_model()
         self.model_hash = hash(str(self.model))
-        self.fed.add_to_blockchain({"type": "vendor join", "id": self.id, "model hash": self.model_hash})
+        self.fed.addMember(self, self.id, self.model_hash)
+
+        self.consumerOfAgreementInProgress = None
+
+        self.dataRecieved = list()
 
     # def model_as_algorithm(self, data):
     #     gender = data["isMale"] == 1
@@ -19,29 +24,36 @@ class Vendor(Entity):
     #     ans = gender + neutral + popular >= 2
     #     return ans
 
-    def generate_model(self):
+    @staticmethod
+    def generate_model():
         # the "model" is a list of (int, movie) tuples
         # if a consumer's data is a list of 5 floats between 0 and 1, the sum of all data could be between 0 and 5
         m = list()
-        currentThreshhold = 0
-        while currentThreshhold < 50:
-            m.append((currentThreshhold, random.choice(movieList)))
-            currentThreshhold += random.randint(5, 15)
+        current_threshhold = 0
+        while current_threshhold < 50:
+            m.append((current_threshhold, random.choice(movieList)))
+            current_threshhold += random.randint(5, 15)
         return m
 
     def get_model(self):
         return self.model
 
-    def accept_exchange(self, consumerID):
-        if type(self.fed.entities[consumerID]) == Consumer:
+    def accept_exchange(self, c):
+        if type(self.fed.entities[c.consumerID]) == consumer.Consumer:
+            self.consumerOfAgreementInProgress = c
             return True
         else:
             return False
 
-    def send_info(self, d, c, t):
-        alpha = Federation.alpha_bargain(self, c)
+    def recieve_info(self, d):
+        alpha = Federation.alpha_bargain(self, self.consumerOfAgreementInProgress)
         rec = Federation.recommend(self.model, d)
         self.fed.add_to_blockchain_buffer(
-            {"type": "transaction", "time": t, "consumer": c.id, "vendor": self.id, "alpha hash": hash(alpha),
+            {"type": "transaction", "time": self.time, "consumer": self.consumerOfAgreementInProgress.id, "vendor": self.id, "alpha hash": hash(alpha),
              "distorted data hash": hash(str(d)), "recommendation hash": hash(rec)})
-        return rec
+        self.dataRecieved.append((self.consumerOfAgreementInProgress, d))
+        self.consumerOfAgreementInProgress.recieve_rec(rec)
+        self.consumerOfAgreementInProgress = None
+
+    def updateKnowledgeOfOtherParties(self):
+        self.consumersIKnowAbout = self.fed.consumerList

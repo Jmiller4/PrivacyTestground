@@ -1,7 +1,8 @@
 # holds description of a "federation" class/object
 
 import random
-
+import consumer
+import vendor
 
 class Federation:
 
@@ -12,10 +13,17 @@ class Federation:
         self.blockchain = list()
         self.entities = dict()
         self.IDs = set()
+        self.time = 0
 
-    def addMember(self, e, id):
+    def addMember(self, e, id, firsthash):
         self.entities[id] = e
         self.IDs.add(id)
+        if type(e) == consumer.Consumer:
+            self.consumerList.append(e)
+            self.add_to_blockchain({"type": "consumer join", "id": id, "info hash": firsthash})
+        if type(e) == vendor.Vendor:
+            self.vendorList.append(e)
+            self.add_to_blockchain({"type": "vendor join", "id": id, "model hash": firsthash})
         # may want to add exception-throwing when this is called with an id that's already in use
 
     def add_to_blockchain_buffer(self, data):
@@ -92,4 +100,6 @@ class Federation:
     #         if ConsumerID in self.blockchain[VendorID]:
     #             return self.blockchain[VendorID][ConsumerID]
     #     return False
-    #
+
+    def incrementTime(self):
+        self.time += 1

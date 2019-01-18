@@ -11,11 +11,17 @@ class Consumer(Entity):
 
     def __init__(self, fed):
         Entity.__init__(self, fed)
+        self.vendorsIKnowAbout = list()
         self.data = dict()
         self.data_simple = self.generate_data_simple()
-
         self.data_hash = hash(str(self.data_simple))
-        self.fed.add_to_blockchain({"type": "consumer join", "id": self.id, "info hash": self.data_hash})
+        self.fed.addMember(self, self.id, self.data_hash)
+
+        self.alphaOfAgreementInProgress = None
+        self.distortedDataOfAgreementInProgress = None
+        self.vendorOfAgreementInProgress = None
+
+        self.recommendationsRecieved = list()
 
     # def generateData(self):
     #     #Location is uniformly distributed over earth
@@ -56,14 +62,29 @@ class Consumer(Entity):
     #         Distort[key] = self.data[key] + alpha * rndSeed
     #     return Distort
 
-    def exchange(self, v, t):
+    def initiateExchange(self):
+        # choose a vendor to do business with
+        v = random.choice(self.vendorsIKnowAbout)
+
+        # ask if the vendor will do business. if so...
         if v.accept_exchange(self.id):
+            self.vendorOfAgreementInProgress = v
             # "bargain" over alpha
             alpha = Federation.alpha_bargain(self, v)
+            self.alphaOfAgreementInProgress = alpha
             # distort data according to alpha
             d = Federation.distort(self.data_simple, alpha, 1)
-            rec = v.send_info(d, self, t)
-            self.fed.add_to_blockchain_buffer({"type": "transaction", "time": t, "consumer": self.id, "vendor": v.id, "alpha hash": hash(alpha), "distorted data hash": hash(str(d)), "recommendation hash": hash(rec)})
+            self.distortedDataOfAgreementInProgress = str(d)
+            v.recieve_info(d)
+
+    def receive_rec(self, rec):
+        self.fed.add_to_blockchain_buffer(
+            {"type": "transaction", "time": self.time, "consumer": self.id, "vendor": self.vendorOfAgreementInProgress.id, "alpha hash": hash(self.alphaOfAgreementInProgress),
+             "distorted data hash": hash(str(self.distortedDataOfAgreementInProgress)), "recommendation hash": hash(rec)})
+        self.recommendationsRecieved.append((self.vendorOfAgreementInProgress.id, rec))
+        self.alphaOfAgreementInProgress = None
+        self.distortedDataOfAgreementInProgress = None
+        self.vendorOfAgreementInProgress = None
 
     def getData(self, alpha):
         return self.Distort(alpha)
@@ -74,4 +95,5 @@ class Consumer(Entity):
             dictString = dictString + x + ': ' + str(self.data[x]) + '\n'
         return(dictString)
 
-
+    def updateKnowledgeOfOtherParties(self):
+        self.vendorsIKnowAbout = self.fed.vendorList
