@@ -3,6 +3,7 @@
 import random
 import consumer
 import vendor
+import math
 
 class Federation:
 
@@ -103,3 +104,28 @@ class Federation:
 
     def incrementTime(self):
         self.time += 1
+
+    # Based on section 2.3.2 RAM Reductions and TinyRAM:
+    # https://madars.org/phd-thesis/Madars-Virza-thesis-20170831.pdf
+    # While theoretical circuit size is O(TlogT + cT)
+    # The authors demonstrate that O(cT) Dominates where c is a cpu transition function
+    # Below I encode the T runtime for a KNN prediction
+    def proofTime(self, K, n):
+
+        i = 0
+        #Evaluate Destance for k datapoints
+        while i <= n:
+            # Counter and arbitrary binary computation
+            i = i + 1
+        i = 0
+        #Sort n points by distance using quicksort
+        while i <= n*math.log(n):
+            # Counter and arbitrary binary computation
+            i = i + 1
+        i = 0
+        #Nearest neighbor voting for K nearest neighbors
+        while i <= K:
+            # Hashing the constant K should have a similar computational runtime as selecting from a hastable
+            hash(K)
+            # Counter and arbitrary binary computation
+            i = i + 1
