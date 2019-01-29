@@ -3,7 +3,7 @@
 from entity import *
 from consumer import *
 from globaldata import *
-
+import federation
 
 class Vendor(Entity):
     def __init__(self, fed):
@@ -39,21 +39,19 @@ class Vendor(Entity):
         return self.model
 
     def accept_exchange(self, c):
-        if type(self.fed.entities[c.consumerID]) == consumer.Consumer:
-            self.consumerOfAgreementInProgress = c
-            return True
-        else:
-            return False
+        self.consumerOfAgreementInProgress = self.fed.entities[c]
+        return True
+
 
     def recieve_info(self, d):
-        alpha = Federation.alpha_bargain(self, self.consumerOfAgreementInProgress)
-        rec = Federation.recommend(self.model, d)
+        alpha = self.fed.alpha_bargain(self, self.consumerOfAgreementInProgress)
+        rec = self.fed.recommend(self.model, d)
         self.fed.add_to_blockchain_buffer(
             {"type": "transaction", "time": self.time, "consumer": self.consumerOfAgreementInProgress.id, "vendor": self.id, "alpha hash": hash(alpha),
              "distorted data hash": hash(str(d)), "recommendation hash": hash(rec)})
         self.memory.append({"time": self.time, "consumer": self.consumerOfAgreementInProgress.id, "alpha": alpha,
              "distorted data": d, "recommendation": rec})
-        self.consumerOfAgreementInProgress.recieve_rec(rec)
+        self.consumerOfAgreementInProgress.receive_rec(rec)
         self.consumerOfAgreementInProgress = None
 
     def updateKnowledgeOfOtherParties(self):
